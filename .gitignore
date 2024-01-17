@@ -396,3 +396,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+ImageGalleryApi/ImageGalleryApi/wwwroot/protected/gallery/

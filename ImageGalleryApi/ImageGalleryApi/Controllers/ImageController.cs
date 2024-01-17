@@ -1,13 +1,13 @@
-﻿using ImageGalleryApi.Models;
+﻿using ImageGalleryApi.Interfaces;
+using ImageGalleryApi.Models;
 using ImageGalleryApi.Models.DTOs;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImageGalleryApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ImageController : ControllerBase
+public class ImageController(IImageService _imageService) : ControllerBase
 {
 	/// <summary>
 	/// Retrieve all Images
@@ -18,41 +18,38 @@ public class ImageController : ControllerBase
 	/// <response code="500">Internal Server Error - Something went wrong</response>
 	/// <returns>Returns all Images</returns>
 	[HttpGet(Name = "Get All Images")]
-	[ProducesResponseType(typeof(List<ImageDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ApiResult<IEnumerable<ImageDto>>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	public async Task<IActionResult> GetAllImages()
 	{
-		var images = new List<ImageDto>
-		{
-			new()
-			{
-				Id = Guid.NewGuid().ToString(),
-				CreatedOn = DateTime.Now,
-				DateModified = DateTime.Now,
-				Description = "This is a test image",
-				ImageUrl = "https://image.com",
-				Title = "My Image"
-			},
-			new()
-			{
-				Id = Guid.NewGuid().ToString(),
-				CreatedOn = DateTime.Now,
-				DateModified = DateTime.Now,
-				Description = "This is a test image2",
-				ImageUrl = "https://image.com",
-				Title = "My Image 2"
-			}
-		};
-		return Ok(images);
+		var result = await _imageService.GetAllImages();
+		return Ok(result);
 	}
 
-	[HttpGet("{id:guid}", Name = "Get Image")]
-	public async Task<IActionResult> GetImage(Guid id)
+	/// <summary>
+	/// Retrieve single Image
+	/// </summary>
+	/// <response code="200">Returns Image</response>
+	/// <response code="401">User is unauthorizeed</response>
+	/// <response code="404">User credentials could not be found</response>
+	/// <response code="500">Internal Server Error - Something went wrong</response>
+	/// <returns>Returns Image</returns>
+	[HttpGet("{id}", Name = "Get Image")]
+	[ProducesResponseType(typeof(ApiResult<ImageDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<IActionResult> GetImage(string id)
 	{
-		return Ok("One image here");
+		var result = await _imageService.GetImage(id);
+
+		if (result.Succeeded) return Ok(result);
+
+		return BadRequest(result);
 	}
 
 	/// <summary>
@@ -69,65 +66,65 @@ public class ImageController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	public async Task<IActionResult> CreateImage([FromBody] CreateImageDto model)
+	public async Task<IActionResult> CreateImage([FromForm] CreateImageDto model)
 	{
-		if (ModelState.IsValid)
-		{
-			var image = new Image
-			{
-				Title = model.Title,
-				Description = model.Description,
-				DateModified = DateTime.Now,
-				CreatedOn = DateTime.Now
-			};
+		if (!ModelState.IsValid) return BadRequest("Model State is invalid");
 
-			if (string.IsNullOrEmpty(model.Data))
-			{
-				return BadRequest("Data string is empty or null.");
-			}
+		var baseUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
-			var imagePath = await SaveImageFromStringAsync(model.Data, model.Title);
+		var result = await _imageService.CreateImage(model, baseUri);
 
-			image.ImageUrl = imagePath;
+		if (result.Succeeded) return Created(result.Data?.ImageUrl, result);
 
-			return Ok(image);
-		}
-		return BadRequest("Model State is invalid");
+		return BadRequest(result);
 	}
 
-	[HttpPut("{id:guid}", Name = "Update Image")]
-	public async Task<IActionResult> UpdateImage(Guid id, EditImageDto model)
+	/// <summary>
+	/// Updates a image information
+	/// </summary>
+	/// <response code="200">Returns Image</response>
+	/// <response code="401">User is unauthorizeed</response>
+	/// <response code="404">User credentials could not be found</response>
+	/// <response code="500">Internal Server Error - Something went wrong</response>
+	/// <returns>Returns Image</returns>
+	[HttpPut("{id}", Name = "Update Image")]
+	[ProducesResponseType(typeof(ImageDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<IActionResult> UpdateImage([FromRoute] string id, [FromBody] EditImageDto model)
 	{
-		if (ModelState.IsValid)
-		{
+		if (!ModelState.IsValid) return BadRequest("The modelstate is not valid");
 
-		}
+		var result = await _imageService.UpdateImage(id, model);
 
-		return BadRequest("The modelstate is not valid");
+		if (result.Succeeded) return Ok(result);
+
+		return BadRequest(result);
+
 	}
 
-	[HttpDelete("{id:guid}", Name = "Delete Image")]
-	public async Task<IActionResult> DeleteImage(Guid id)
+	/// <summary>
+	/// Removes an image
+	/// </summary>
+	/// <response code="200">Returns image id</response>
+	/// <response code="401">User is unauthorizeed</response>
+	/// <response code="404">User credentials could not be found</response>
+	/// <response code="500">Internal Server Error - Something went wrong</response>
+	/// <returns>Returns id</returns>
+	[HttpDelete("{id}", Name = "Delete Image")]
+	[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<IActionResult> DeleteImage([FromRoute] string id)
 	{
-		return Ok();
-	}
+		var result = await _imageService.DeleteImage(id);
 
+		if (result.Succeeded) return Ok(result);
 
-
-	private async Task<string> SaveImageFromStringAsync(string base64String, string title)
-	{
-		var bytes = Convert.FromBase64String(base64String);
-
-		var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), $"Uploads");
-		if (!Directory.Exists(uploadsFolder))
-			Directory.CreateDirectory(uploadsFolder);
-
-		var uniqueFileName = $"{title}-{DateTime.Now}.png"; // You may want to specify the file type
-
-		var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-		await System.IO.File.WriteAllBytesAsync(filePath, bytes);
-
-		return filePath;
+		return BadRequest(result);
 	}
 }

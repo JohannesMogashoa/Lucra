@@ -14,5 +14,5 @@ public class CreateImageDto
 	public required string Description { get; set; }
 
 	[JsonProperty("data")]
-	public string Data { get; set; }
+	public IFormFile Data { get; set; }
 }

@@ -12,7 +12,4 @@ public class EditImageDto
 	[Required]
 	[JsonProperty("description")]
 	public required string Description { get; set; }
-
-	[JsonProperty("data")]
-	public string Data { get; set; }
 }
