@@ -19,7 +19,6 @@ public class ImageController(IImageService imageService) : ControllerBase
 	/// <response code="404">User credentials could not be found</response>
 	/// <response code="500">Internal Server Error - Something went wrong</response>
 	/// <returns>Returns all Images</returns>
-	[Authorize]
 	[HttpGet(Name = "Get All Images")]
 	[ProducesResponseType(typeof(ApiResult<IEnumerable<ImageDto>>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
