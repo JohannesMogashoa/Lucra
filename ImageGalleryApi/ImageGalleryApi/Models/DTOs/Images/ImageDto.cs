@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace ImageGalleryApi.Models.DTOs;
+namespace ImageGalleryApi.Models.DTOs.Images;
 
 public class ImageDto
 {

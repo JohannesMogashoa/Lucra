@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
-namespace ImageGalleryApi.Models.DTOs;
+namespace ImageGalleryApi.Models.DTOs.Images;
 
-public class CreateImageDto
+public class EditImageDto
 {
 	[Required]
 	[JsonProperty("title")]
@@ -12,7 +12,4 @@ public class CreateImageDto
 	[Required]
 	[JsonProperty("description")]
 	public required string Description { get; set; }
-
-	[JsonProperty("data")]
-	public IFormFile Data { get; set; }
 }

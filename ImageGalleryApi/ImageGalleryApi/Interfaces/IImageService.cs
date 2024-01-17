@@ -1,5 +1,6 @@
 ﻿using ImageGalleryApi.Models;
 using ImageGalleryApi.Models.DTOs;
+using ImageGalleryApi.Models.DTOs.Images;
 
 namespace ImageGalleryApi.Interfaces;
 

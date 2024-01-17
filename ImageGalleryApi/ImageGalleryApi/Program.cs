@@ -1,24 +1,20 @@
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using ImageGalleryApi.Configurations;
 using ImageGalleryApi.Data;
 using ImageGalleryApi.Interfaces;
 using ImageGalleryApi.Mappers;
 using ImageGalleryApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
-builder.Services.AddScoped<IImageService, ImageService>();
-
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -35,6 +31,31 @@ builder.Services.AddSwaggerGen(opt =>
     opt.AddSecurityRequirement(OpenAPIConfig.GetSecurityRequirement());
 });
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = "https://localhost:7210",
+        ValidAudience = "https://localhost:7210",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("9eb16bf2-a3f2-4b89-84ed-04456943c1c2-4efabca0-5f2e-472e-9dfc-fe94589b3a3d")),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+    };
+});
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 
@@ -46,9 +67,10 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseStaticFiles();
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

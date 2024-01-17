@@ -6,4 +6,5 @@ namespace ImageGalleryApi.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
 	public DbSet<Image> Images { get; set; }
+	public DbSet<User> Users { get; set; }
 }

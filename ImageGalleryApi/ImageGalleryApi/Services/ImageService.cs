@@ -3,6 +3,7 @@ using ImageGalleryApi.Data;
 using ImageGalleryApi.Interfaces;
 using ImageGalleryApi.Models;
 using ImageGalleryApi.Models.DTOs;
+using ImageGalleryApi.Models.DTOs.Images;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImageGalleryApi.Services;
