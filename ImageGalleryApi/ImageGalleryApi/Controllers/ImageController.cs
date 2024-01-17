@@ -7,7 +7,7 @@ namespace ImageGalleryApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ImageController(IImageService _imageService) : ControllerBase
+public class ImageController(IImageService imageService) : ControllerBase
 {
 	/// <summary>
 	/// Retrieve all Images
@@ -25,7 +25,7 @@ public class ImageController(IImageService _imageService) : ControllerBase
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	public async Task<IActionResult> GetAllImages()
 	{
-		var result = await _imageService.GetAllImages();
+		var result = await imageService.GetAllImages();
 		return Ok(result);
 	}
 
@@ -45,7 +45,7 @@ public class ImageController(IImageService _imageService) : ControllerBase
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	public async Task<IActionResult> GetImage(string id)
 	{
-		var result = await _imageService.GetImage(id);
+		var result = await imageService.GetImage(id);
 
 		if (result.Succeeded) return Ok(result);
 
@@ -72,7 +72,7 @@ public class ImageController(IImageService _imageService) : ControllerBase
 
 		var baseUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
-		var result = await _imageService.CreateImage(model, baseUri);
+		var result = await imageService.CreateImage(model, baseUri);
 
 		if (result.Succeeded) return Created(result.Data?.ImageUrl, result);
 
@@ -97,7 +97,7 @@ public class ImageController(IImageService _imageService) : ControllerBase
 	{
 		if (!ModelState.IsValid) return BadRequest("The modelstate is not valid");
 
-		var result = await _imageService.UpdateImage(id, model);
+		var result = await imageService.UpdateImage(id, model);
 
 		if (result.Succeeded) return Ok(result);
 
@@ -121,7 +121,7 @@ public class ImageController(IImageService _imageService) : ControllerBase
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	public async Task<IActionResult> DeleteImage([FromRoute] string id)
 	{
-		var result = await _imageService.DeleteImage(id);
+		var result = await imageService.DeleteImage(id);
 
 		if (result.Succeeded) return Ok(result);
 

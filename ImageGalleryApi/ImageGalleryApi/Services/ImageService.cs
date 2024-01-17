@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ImageGalleryApi.Services;
 
-public class ImageService(ApplicationDbContext context, IMapperBase mapper) : IImageService
+public class ImageService(ApplicationDbContext context, IMapper mapper) : IImageService
 {
 	public async Task<ApiResult<IEnumerable<ImageDto>>> GetAllImages()
 	{

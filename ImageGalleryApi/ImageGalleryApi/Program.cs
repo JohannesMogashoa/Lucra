@@ -1,13 +1,25 @@
+using System.Reflection;
 using System.Text.Json;
 using ImageGalleryApi.Configurations;
 using ImageGalleryApi.Data;
 using ImageGalleryApi.Interfaces;
+using ImageGalleryApi.Mappers;
 using ImageGalleryApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -23,14 +35,6 @@ builder.Services.AddSwaggerGen(opt =>
     opt.AddSecurityRequirement(OpenAPIConfig.GetSecurityRequirement());
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
-builder.Services.AddScoped<IImageService, ImageService>();
-
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
