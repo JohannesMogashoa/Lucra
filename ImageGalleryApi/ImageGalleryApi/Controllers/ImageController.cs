@@ -68,6 +68,7 @@ public class ImageController(IImageService imageService) : ControllerBase
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	[Consumes("multipart/form-data")]
 	public async Task<IActionResult> CreateImage([FromForm] CreateImageDto model)
 	{
 		if (!ModelState.IsValid) return BadRequest("Model State is invalid");

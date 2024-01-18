@@ -1,7 +1,12 @@
-export default async function Home() {
-	const response = await fetch("https://localhost:7210/api/images");
+import Link from "next/link";
+import http from "@/lib/http-common"
+import Image from "next/image";
 
-	console.log(await response.json());
+
+export default async function Home() {
+	const response : ApiResponse = await http.get("/api/images").then(response => response.data)
+
+	console.log(response)
 
 	return (
 		<main>
@@ -9,12 +14,34 @@ export default async function Home() {
 				<div className="navbar-start">
 					<a className="btn btn-ghost text-xl">Lucra Image Gallery</a>
 				</div>
-				<div className="navbar-end">
+				<div className="navbar-end gap-3">
+					<Link href={"/upload"} className="btn">Upload</Link>
 					<a className="btn">Login</a>
 				</div>
 			</div>
-			<h1>Welcome to Lucra Image Gallery</h1>
-			<img src="https://localhost:7210/protected/gallery/634d86c9-2b1a-4cbd-b81f-c4b16b3e5500_king.jpg" />
+			{response.data.length ? response.data.map(i => (
+				<Link className={"mb-5"} key={i.id} href={`/image/${i.id}`}>
+					<Image width={250} height={250} src={i.image_url}  alt={i.title} />
+				</Link>
+			)) : (
+				<p className={"text-center"}>There are currently no images uploaded...</p>
+			)}
 		</main>
 	);
+}
+
+type ApiResponse = {
+	data: Image[],
+	succeeded: boolean,
+	errors: string[],
+	error_message: string
+}
+
+type Image = {
+	id: string,
+	title: string,
+	image_url: string,
+	description: string,
+	date_modified: Date,
+	created_on: Date
 }

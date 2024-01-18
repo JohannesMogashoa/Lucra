@@ -49,6 +49,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddCors();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -67,11 +69,13 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors(options => options.AllowAnyOrigin());
 
 app.MapControllers();
 
